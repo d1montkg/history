@@ -274,26 +274,26 @@
 
         <!-- Нормальное распределение -->
         <div id="distribution" class="tab-content">
-            <h2>Нормальное распределение численности Думы</h2>
+            <h2>Стандартное нормальное распределение (μ=0, σ=1)</h2>
             <div class="chart-container">
-                <canvas id="distributionChart"></canvas>
+                <canvas id="standardNormalChart"></canvas>
             </div>
             <div class="info-box" style="background-color: rgba(88, 28, 135, 0.3); border-color: #a855f7;">
                 <h3 style="font-size: 18px; font-weight: bold; margin-bottom: 8px;">Параметры распределения:</h3>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; color: #e9d5ff;">
-                    <div>• Среднее значение (μ): <strong>28 человек</strong></div>
-                    <div>• Стандартное отклонение (σ): <strong>14 человек</strong></div>
-                    <div>• Медиана: <strong>24 человека</strong></div>
-                    <div>• Размах: <strong>10-51 человек</strong></div>
+                    <div>• Среднее значение (μ): <strong>0</strong></div>
+                    <div>• Стандартное отклонение (σ): <strong>1</strong></div>
+                    <div>• Диапазон: <strong>от -4 до +4</strong></div>
+                    <div>• Точек: <strong>161</strong></div>
                 </div>
             </div>
             <div class="info-box" style="background-color: rgba(30, 58, 138, 0.3); border-color: #3b82f6; margin-top: 16px;">
                 <h3 style="font-size: 18px; font-weight: bold; margin-bottom: 8px;">Интерпретация:</h3>
                 <p style="color: #bfdbfe; line-height: 1.6;">
-                    График показывает, что состав Думы варьировался значительно. Распределение имеет 
-                    положительную асимметрию с выбросами в период реформ (1550-1564) и резким падением 
-                    в период опричнины. Нормальное распределение показывает "естественный" размер Думы 
-                    около 25-30 человек, но политические события существенно отклоняли от этой нормы.
+                    Это классическое стандартное нормальное распределение (распределение Гаусса). 
+                    График показывает колоколообразную кривую, симметричную относительно нуля.
+                    Около 68% значений находятся в диапазоне [-1, 1], 95% в диапазоне [-2, 2], 
+                    и 99.7% в диапазоне [-3, 3]. Это фундаментальное распределение в статистике.
                 </p>
             </div>
         </div>
@@ -437,45 +437,37 @@
             }
         });
 
-        // График нормального распределения
-        function generateNormalDistribution() {
+        // График стандартного нормального распределения (μ=0, σ=1)
+        function generateStandardNormal() {
             const data = [];
-            const mean = 28;
-            const stdDev = 14;
+            const mu = 0;
+            const sigma = 1;
             
-            for (let x = 0; x <= 60; x += 2) {
-                const y = (1 / (stdDev * Math.sqrt(2 * Math.PI))) * 
-                          Math.exp(-0.5 * Math.pow((x - mean) / stdDev, 2)) * 500;
-                data.push({ x, y });
+            // От -4σ до +4σ с шагом 0.05
+            for (let x = mu - 4*sigma; x <= mu + 4*sigma; x += 0.05) {
+                const y = (1 / (sigma * Math.sqrt(2 * Math.PI))) * 
+                          Math.exp(-0.5 * Math.pow((x - mu) / sigma, 2));
+                data.push({ x: parseFloat(x.toFixed(2)), y });
             }
             return data;
         }
 
-        const normalDist = generateNormalDistribution();
-        const ctx2 = document.getElementById('distributionChart').getContext('2d');
-        new Chart(ctx2, {
+        const standardNormal = generateStandardNormal();
+        const ctx3 = document.getElementById('standardNormalChart').getContext('2d');
+        new Chart(ctx3, {
             type: 'line',
             data: {
-                labels: normalDist.map(d => d.x),
+                labels: standardNormal.map(d => d.x),
                 datasets: [
                     {
-                        label: 'Теоретическое распределение',
-                        data: normalDist.map(d => d.y),
+                        label: 'μ=0, σ=1',
+                        data: standardNormal.map(d => d.y),
                         borderColor: '#8b5cf6',
-                        backgroundColor: 'rgba(139, 92, 246, 0.2)',
-                        borderWidth: 3,
-                        fill: true,
-                        tension: 0.4
-                    },
-                    {
-                        label: 'Фактические данные',
-                        data: dumaData.map(d => d.total),
-                        borderColor: '#ec4899',
-                        backgroundColor: '#ec4899',
+                        backgroundColor: 'rgba(139, 92, 246, 0.3)',
                         borderWidth: 2,
-                        pointRadius: 6,
-                        pointHoverRadius: 8,
-                        showLine: false
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0
                     }
                 ]
             },
@@ -483,18 +475,39 @@
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { labels: { color: 'white', font: { size: 14 } } }
+                    legend: { 
+                        labels: { color: 'white', font: { size: 14 } }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Нормальное распределение',
+                        color: 'white',
+                        font: { size: 16 }
+                    }
                 },
                 scales: {
                     y: { 
                         ticks: { color: 'white' },
                         grid: { color: 'rgba(255,255,255,0.1)' },
-                        title: { display: true, text: 'Размер Думы', color: 'white' }
+                        title: { 
+                            display: true, 
+                            text: 'Плотность вероятности', 
+                            color: 'white',
+                            font: { size: 14 }
+                        }
                     },
                     x: { 
-                        ticks: { color: 'white' },
+                        ticks: { 
+                            color: 'white',
+                            maxTicksLimit: 15
+                        },
                         grid: { color: 'rgba(255,255,255,0.1)' },
-                        title: { display: true, text: 'Плотность вероятности', color: 'white' }
+                        title: { 
+                            display: true, 
+                            text: 'x', 
+                            color: 'white',
+                            font: { size: 14 }
+                        }
                     }
                 }
             }
@@ -573,5 +586,4 @@
         familiesTable.innerHTML = tableHTML;
     </script>
 </body>
-
 </html>
